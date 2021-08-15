@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html lang="">
+
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="main.css">
+    <link rel="icon" href="icon.png" sizes="62x62" type="image/png" />
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>工学演習課題</title>
+  </head>
+
+  <body>
+    <h1>工学演習 RC回路簡易シミュレータ</h1>
+    <div class="slidecontainer" id="sliders">
+      <input type="range" min="0" max="10" value="1" step="0.01" class="slider" id="slider_C">C : <span id="val_C">1.00</span>μF<br />
+      <input type="range" min="0" max="10" value="1" step="0.01" class="slider" id="slider_R">R : <span id="val_R">1.00</span>kΩ<br />
+      <input type="range" min="0" max="10" value="1" step="0.01" class="slider" id="slider_E">E : <span id="val_E">1.00</span>V<br />
+      <input type="range" min="0.0002" max="0.1" value="0.01" step="0.001" class="slider" id="slider_dt">Δt : <span id="val_dt">0.01</span>ms<br />
+    </div>
+    <div class="chart-container" style="position: relative; height:800px; width:1000px; margin:auto">
+      <canvas id="myChart"></canvas>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
+    <script type="text/javascript" src="https://github.com/nagix/chartjs-plugin-colorschemes/releases/download/v0.2.0/chartjs-plugin-colorschemes.min.js"></script>
+    <script>
+      function calc_xs(dt) {
+        let num = 5/ dt;
+        const xs = [];
+        for (let i = 0; i < num; i++) {
+            xs.push(i * dt);
+        }
+        return xs;
+      } 
+
+      function calc_ys(xs, dt, tau, E) {
+        let num = 5/ dt;
+        let V=0;
+        const ys = [];
+        for (let i = 0; i < num; i++) {
+            ys.push(V);
+            V = (1-(dt/tau))*V+(E/tau)*dt;
+        }
+        return ys;
+      } 
+
+      const ctx = document.getElementById("myChart").getContext('2d');
+      let myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: calc_xs(0.01),
+          datasets: [{
+            label: 'x',
+            fill: false,
+            pointRadius: 1,
+            ineTension: 1,
+            label: '近似解',
+            borderColo: "#FFFFFF",
+            pointBackgroudnColor: "#FFFFFA",
+            data: calc_ys(calc_xs(0.01), 0.01, 1.00, 1.00)
+          }]
+        },
+        options: {
+          legend: {
+            display: true,
+            padding: 20,
+            labels: {
+              fontColor: '#FFFFFA'
+            }
+          },
+          scales: {
+            yAxes: [{
+              ticks: {
+                min: 0,
+                stepSize: 1,
+                fontColor: '#FFFFFA',
+                max: 1.01
+              },
+              gridLines:{
+                color: "#FFFFFA",
+                lineWidth:0.4,
+                zeroLineColor :"#FFFFFA",
+                zeroLineWidth : 2
+              },
+            }],
+            xAxes: [{
+              ticks: {
+                min: 0,
+                stepSize: 1,
+                fontColor: '#FFFFFA',
+                max: 1.01
+              },
+              gridLines:{
+                color: "#FFFFFA",
+                lineWidth:0.4,
+                zeroLineColor :"#FFFFFA",
+                zeroLineWidth : 2
+              },
+            }]
+          },
+        }
+      }); 
+
+      let sliders = document.getElementById("sliders");
+      sliders.addEventListener("input", function() {
+        let C = document.getElementById("slider_C").value;
+        let R = document.getElementById("slider_R").value;
+        let E = document.getElementById("slider_E").value;
+        let dt = document.getElementById("slider_dt").value;
+        document.getElementById("val_C").textContent = C;
+        document.getElementById("val_R").textContent = R;
+        document.getElementById("val_E").textContent = E;
+        document.getElementById("val_dt").textContent = dt;
+        let tau = C * R; //Vはいらない
+        myChart.data.labels = calc_xs(Number(dt)); 
+        myChart.data.datasets[0].data = calc_ys(calc_xs(Number(dt)), Number(dt), Number(tau), Number(E));
+        myChart.options.scales.yAxes[0].ticks.max = Number(E); 
+        myChart.update();
+      }, false);
+
+    </script>
+  </body>
+
+</html>
