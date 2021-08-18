@@ -42,6 +42,17 @@
         }
         return ys;
       } 
+      
+      function calc_yss(xs, dt, tau, E) {
+        let num = 5/ dt;
+        let v=0;
+        const yss = [];
+        for (let j = 0; j < num; j++) {
+          yss.push(v);
+          v = E*(1-Math.exp(-j*dt/tau));
+        }
+        return yss;
+      }
 
       const ctx = document.getElementById("myChart").getContext('2d');
       let myChart = new Chart(ctx, {
@@ -57,6 +68,14 @@
             borderColo: "#FFFFFF",
             pointBackgroudnColor: "#FFFFFA",
             data: calc_ys(calc_xs(0.01), 0.01, 1.00, 1.00)
+          }, {
+            fill: false,
+            pointRadius: 1,
+            ineTension: 1,
+            label: '厳密解',
+            pointBackgroundColor: "#FFF000",
+            data: calc_yss(calc_xs(0.01), 0.01, 1.00, 1.00),
+            order: 2
           }]
         },
         options: {
@@ -121,6 +140,7 @@
         let tau = C * R; //Vはいらない
         myChart.data.labels = calc_xs(Number(dt)); 
         myChart.data.datasets[0].data = calc_ys(calc_xs(Number(dt)), Number(dt), Number(tau), Number(E));
+        myChart.data.datasets[1].data = calc_yss(calc_xs(Number(dt)), Number(dt), Number(tau), Number(E));
         myChart.options.scales.yAxes[0].ticks.max = Number(E); 
         myChart.update();
       }, false);
